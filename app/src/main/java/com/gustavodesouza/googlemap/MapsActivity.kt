@@ -1,10 +1,16 @@
 package com.gustavodesouza.googlemap
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.core.app.ActivityCompat
+import com.google.android.gms.location.FusedLocationProviderClient
+
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -12,24 +18,35 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.tasks.Task
 import com.google.gson.GsonBuilder
 import okhttp3.*
 import java.io.IOException
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.Marker
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener  {
+
 
     private lateinit var mMap: GoogleMap
     private lateinit var listOfBikeStations: List<BikeStation>
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
         retrieveFavourites()
+
+
     }
 
     override fun onResume() {
@@ -48,7 +65,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      * installed Google Play services and returned to the app.
      */
     override fun onMapReady(googleMap: GoogleMap) {
-        mMap = googleMap
+
+         mMap = googleMap
+
+        mMap.uiSettings.isZoomControlsEnabled = true
+        mMap.setOnMarkerClickListener(this)
 
         // Add a marker in Sydney and move the camera
         val sydney = LatLng(-34.0, 151.0)
@@ -92,7 +113,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 Log.i(getString(R.string.MAPLOGGING), "http success")
 
                 // Get the response body
-                val body = response?.body?.string()
+                val body = response.body?.string()
 
 
                 Log.i(getString(R.string.MAPLOGGING), body)
@@ -121,7 +142,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     mMap.addMarker(
                         MarkerOptions().position(position).title("Marker in ${it.address}")
                     )
-                marker1.setTag(it.number)
+                marker1.tag = it.number
                 Log.i(getString(R.string.MAPLOGGING), it.address)
             }
 
@@ -140,7 +161,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
             Log.i(
                 getString(R.string.MAPLOGGING),
-                "Marker id (tag) is " + marker.getTag().toString()
+                "Marker id (tag) is " + marker.tag.toString()
             )
             if (marker.isInfoWindowShown) {
 
@@ -154,12 +175,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val intent = Intent(this, StationActivity::class.java)
 
            intent.putExtra("lat", marker.position.latitude.toString())
-           intent.putExtra("id", marker.getTag().toString())
+           intent.putExtra("id", marker.tag.toString())
            intent.putExtra("lng", marker.position.longitude.toString())
             startActivity(intent)
 
             true
         }
+
+
 
     }
 
@@ -168,13 +191,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val smithfield = LatLng(53.349562, -6.278198)
         var marker1 =
             mMap.addMarker(MarkerOptions().position(smithfield).title("Marker in smithfield"))
-        marker1.setTag(42)
+        marker1.tag = 42
 
 
         val Parnell = LatLng(53.353462, -6.265305)
         var marker2 = mMap.addMarker(MarkerOptions().position(Parnell).title("Marker in Parnell"))
         mMap.moveCamera(CameraUpdateFactory.newLatLng(Parnell))
-        marker2.setTag(30)
+        marker2.tag = 30
 
 
         val Clonmel = LatLng(53.336021, -6.26298)
@@ -191,7 +214,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val position = LatLng(it.position.lat, it.position.lng)
             var marker1 =
                 mMap.addMarker(MarkerOptions().position(position).title("Marker in ${it.address}"))
-            marker1.setTag(it.number)
+            marker1.tag = it.number
             Log.i(getString(R.string.MAPLOGGING), it.address)
         }
 
@@ -208,7 +231,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
        markers?.forEach{m ->  Log.i(getString(R.string.MAPLOGGING), "Favourite Marker: ${m}")}
 
     }
+
+    override fun onMarkerClick(p0: Marker?): Boolean {
+        TODO("Not yet implemented")
+    }
+
+
 }
+
+
+
+
+
+
+
 
 
 
