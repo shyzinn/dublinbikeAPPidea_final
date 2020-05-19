@@ -1,29 +1,20 @@
 package com.gustavodesouza.googlemap
-
-import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.location.Location
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import androidx.core.app.ActivityCompat
+import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.location.FusedLocationProviderClient
-
-
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.tasks.Task
+import com.google.android.gms.maps.model.*
 import com.google.gson.GsonBuilder
 import okhttp3.*
 import java.io.IOException
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.model.Marker
+
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener  {
 
@@ -31,6 +22,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     private lateinit var mMap: GoogleMap
     private lateinit var listOfBikeStations: List<BikeStation>
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,10 +60,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
 
          mMap = googleMap
 
+        mMap.uiSettings.isMapToolbarEnabled = true
+        mMap.uiSettings.isMyLocationButtonEnabled = true
+        mMap.uiSettings.isRotateGesturesEnabled = true
         mMap.uiSettings.isZoomControlsEnabled = true
         mMap.setOnMarkerClickListener(this)
 
+
+
+
         // Add a marker in Sydney and move the camera
+
         val sydney = LatLng(-34.0, 151.0)
         mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
 
@@ -102,13 +101,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                // TODO("Not yet implemented")
+
 
                 Log.i(getString(R.string.MAPLOGGING), "http fail")
             }
 
             override fun onResponse(call: Call, response: Response) {
-                //  TODO("Not yet implemented")
+
 
                 Log.i(getString(R.string.MAPLOGGING), "http success")
 
@@ -137,11 +136,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         runOnUiThread {
 
             listOfBikeStations.forEach {
+
                 val position = LatLng(it.position.lat, it.position.lng)
                 var marker1 =
+
+
+
                     mMap.addMarker(
-                        MarkerOptions().position(position).title("Marker in ${it.address}")
+
+                        MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.iconbikenew)).position(position).title("Marker in ${it.address}")
                     )
+
                 marker1.tag = it.number
                 Log.i(getString(R.string.MAPLOGGING), it.address)
             }
@@ -214,7 +219,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
             val position = LatLng(it.position.lat, it.position.lng)
             var marker1 =
                 mMap.addMarker(MarkerOptions().position(position).title("Marker in ${it.address}"))
-            marker1.tag = it.number
+                      marker1.tag = it.number
             Log.i(getString(R.string.MAPLOGGING), it.address)
         }
 
@@ -234,10 +239,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
 
     override fun onMarkerClick(p0: Marker?): Boolean {
         TODO("Not yet implemented")
+
+
+
+
+            return true
+    }
     }
 
 
-}
+
 
 
 
