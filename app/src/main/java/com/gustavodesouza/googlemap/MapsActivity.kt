@@ -1,6 +1,8 @@
 package com.gustavodesouza.googlemap
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -22,7 +24,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     private lateinit var mMap: GoogleMap
     private lateinit var listOfBikeStations: List<BikeStation>
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-
+    private lateinit var lastLocation: Location
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +43,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
 
     }
 
+
+
     override fun onResume() {
         super.onResume()
         Log.i(getString(R.string.MAPLOGGING), "onResume")
@@ -56,18 +60,44 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+
+
     override fun onMapReady(googleMap: GoogleMap) {
 
          mMap = googleMap
+
+
+
+
+
+
+
+
+
+
+
+
+
+        try {
+
+            val success = googleMap.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    this, R.raw.style_json))
+
+            if (!success) {
+                Log.e("MapsActivity", "Style parsing failed.")
+            }
+        } catch (e: Resources.NotFoundException) {
+            Log.e("MapsActivity", "Can't find style. Error: ", e)
+        }
+
+
 
         mMap.uiSettings.isMapToolbarEnabled = true
         mMap.uiSettings.isMyLocationButtonEnabled = true
         mMap.uiSettings.isRotateGesturesEnabled = true
         mMap.uiSettings.isZoomControlsEnabled = true
         mMap.setOnMarkerClickListener(this)
-
-
-
 
         // Add a marker in Sydney and move the camera
 
@@ -80,8 +110,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
 
         getBikeStationJsonData()
         setMarkerListener()
+
        // addMarkers()
 
+
+        
     }
 
     fun getBikeStationJsonData() {
@@ -124,11 +157,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
 
                 renderListOfBikeStationMarkers()
 
+
             }
 
 
         })
-
     }
 
     fun renderListOfBikeStationMarkers() {
@@ -157,6 +190,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         }
 
     }
+
+
 
 
     fun setMarkerListener() {
@@ -237,8 +272,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
 
     }
 
+
+
+
+
     override fun onMarkerClick(p0: Marker?): Boolean {
-        TODO("Not yet implemented")
 
 
 
